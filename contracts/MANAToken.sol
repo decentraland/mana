@@ -1,4 +1,4 @@
-pragma solidity ^0.4.12;
+pragma solidity ^0.4.11;
 
 import "zeppelin-solidity/contracts/token/MintableToken.sol";
 import "./BurnableToken.sol";

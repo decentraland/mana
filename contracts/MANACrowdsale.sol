@@ -1,11 +1,11 @@
-pragma solidity ^0.4.12;
+pragma solidity ^0.4.11;
 
 import "zeppelin-solidity/contracts/crowdsale/CappedCrowdsale.sol";
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./ContinuousSale.sol";
 import "./MANAToken.sol";
 
-contract MANACrowdsale is Ownable, ContinuousSale, CappedCrowdsale {
+contract MANACrowdsale is ContinuousSale, CappedCrowdsale, FinalizableCrowdsale, WhitelistedCrowdsale {
 
   // bids in reverse dutch auction
   mapping(address => uint256) bids;
