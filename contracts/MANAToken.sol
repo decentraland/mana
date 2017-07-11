@@ -5,8 +5,9 @@ import "./BurnableToken.sol";
 
 contract MANAToken is BurnableToken, MintableToken {
 
-  string public constant symbol = "MANA";
-  string public constant name = "MANA Token";
-  uint8 public constant decimals = 8;
+    string public constant symbol = "MANA";
 
+    string public constant name = "MANA Token";
+
+    uint8 public constant decimals = 8;
 }
