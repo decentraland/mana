@@ -14,32 +14,43 @@ contract ContinuousSale is Ownable {
 
   MintableToken public token;
 
-	// max amount of tokens to mint per block
+  // time bucket size
+  uint256 public constant bucketSize = 12 hours;
+
+  // last time bucket from which tokens have been purchased
+  uint256 public bucketAmount = 0;
+
+  // amount issued in the last bucket
+  uint256 public bucketAmount = 0;
+
+  // max amount of tokens to mint per time bucket
   uint256 public issuance;
 
-	// price of wei in terms of tokens
+  // price of wei in terms of tokens
   uint256 public price;
 
-	// last time the buyTokens function was called
-  uint256 public lastPurchase = 0;
-  
   event TokenPurchase(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 amount);
 
-  function buyTokens(address beneficiary) payable {
-    require(block.number > lastPurchase);
+  function buyContinuousTokens(address beneficiary) payable {
+    uint256 timestamp = block.timestamp;
+    uint256 bucket = timestamp - (timestamp % bucketSize);
 
-		uint256 weiAmount = msg.value;
+    if (bucket > lastBucket) {
+      bucketAmount = 0;
+    }
+
+    uint256 weiAmount = msg.value;
 
     // calculate token amount to be created
     uint256 tokens = weiAmount.mul(price);
-		require(tokens <= issuance);
+    bucketAmount += tokens;
+
+    require(bucketAmount <= issuance);
 
     token.mint(beneficiary, tokens);
     TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
 
     forwardFunds();
-
-    lastPurchase = block.number;
   }
 
   function setIssuance(uint256 _issuance) onlyOwner {
@@ -51,6 +62,4 @@ contract ContinuousSale is Ownable {
   }
 
   function forwardFunds() internal;
-
-  function getToken() internal;
 }
