@@ -1,6 +1,6 @@
 'use strict';
 
-const { assertRevert } = require('./utils.js')
+const { EVMThrow } = require('./utils.js')
 const BurnableTokenMock = artifacts.require("./helpers/BurnableTokenMock.sol")
 
 contract('BurnableToken', function(accounts) {
@@ -21,8 +21,7 @@ contract('BurnableToken', function(accounts) {
   });
 
   it("cannot burn more tokens that you have", async function() {
-		await assertRevert(async function() {
-    	await token.burn(2000, { from: accounts[1] })
-		})
+    await token.burn(2000, { from: accounts[1] })
+      .should.be.rejectedWith(EVMThrow)
   });
 });

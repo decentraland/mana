@@ -9,82 +9,62 @@ import "./MANAToken.sol";
 
 contract MANACrowdsale is ContinuousCrowdsale, CappedCrowdsale, WhitelistedCrowdsale, FinalizableCrowdsale {
 
+    uint256 public constant INFLATION = 8; // percent
+
     uint256 public constant TOTAL_SHARE = 100;
     uint256 public constant CROWDSALE_SHARE = 40;
     uint256 public constant FOUNDATION_SHARE = 60;
 
     // price at which whitelisted investors will be able to buy tokens
-    uint256 public preferentialPrice;
-
-    // price of the tokens. This will be fixed only when crowdsale ends
-    uint256 public price;
+    uint256 public preferentialRate;
 
     // change of price in every block during the initial coin offering
-    uint256 public priceStep;
+    uint256 public rateChange;
 
-    event PriceChange(uint256 amount);
-
-    event TokenClaim(address indexed purchaser, address indexed beneficiary, uint256 amount);
+    event RateChange(uint256 amount);
 
     function MANACrowdsale(
         uint256 _startBlock, uint256 _endBlock,
-        uint256 _startPrice, uint256 _priceStep,
-        uint256 _preferentialPrice,
+        uint256 _rate, uint256 _rateChange,
+        uint256 _preferentialRate,
         address _wallet
     )
-    CappedCrowdsale(150000 ether)
-    WhitelistedCrowdsale()
-    FinalizableCrowdsale()
-    Crowdsale(_startBlock, _endBlock, _startPrice, _wallet)
+        CappedCrowdsale(150000 ether)
+        WhitelistedCrowdsale()
+        FinalizableCrowdsale()
+        Crowdsale(_startBlock, _endBlock, _rate, _wallet)
     {
-        priceStep = _priceStep;
-        preferentialPrice = _preferentialPrice;
+        rateChange = _rateChange;
+        preferentialRate = _preferentialRate;
     }
 
     function createTokenContract() internal returns (MintableToken) {
         return new MANAToken();
     }
 
-    function stopAuction() {
-        require(!hasEnded());
-        price = getPrice(0x0);
-    }
-
-    function getPrice(address beneficiary) internal returns(uint256) {
+    function getRate() internal returns(uint256) {
         // whitelisted investors can purchase at preferential price before crowdsale ends
-        if (isWhitelisted(beneficiary) && !hasEnded()) {
-            return preferentialPrice;
+        if (isWhitelisted(msg.sender) && !hasEnded()) {
+            return preferentialRate;
         }
 
-        // if there is no price set, we are in auction mode
-        if (price == 0) {
-            return rate.add(priceStep.mul(block.number - startBlock));
-        }
-
-        // return the current price if auction ended
-        return price;
-    }
-
-    function buyTokens(address beneficiary) payable {
-        require(beneficiary != 0x0);
-
+        // return the current price if we are in continuous sale
         if (continuousSale) {
-            prepareContinuousPurchase();
-            uint256 tokens = buyTokensInternal(beneficiary);
-            checkContinuousPurchase(tokens);
-        } else {
-            require(validPurchase());
-            buyTokensInternal(beneficiary);
+            return rate;
         }
+
+        // otherwise compute the price for the auction
+        return rate.sub(rateChange.mul(block.number - startBlock));
     }
 
     // low level token purchase function
-    function buyTokensInternal(address beneficiary) internal returns(uint256) {
+    function processPurchase(address beneficiary) internal returns(uint256) {
         uint256 weiAmount = msg.value;
         uint256 updatedWeiRaised = weiRaised.add(weiAmount);
 
+        uint256 rate = getRate();
         // calculate token amount to be created
-        uint256 tokens = weiAmount.mul(getPrice(beneficiary));
+        uint256 tokens = weiAmount.mul(rate);
 
         // update state
         weiRaised = updatedWeiRaised;
@@ -102,27 +82,42 @@ contract MANACrowdsale is ContinuousCrowdsale, CappedCrowdsale, WhitelistedCrowd
         wallet = _wallet;
     }
 
-    function setPrice(uint256 _price) onlyOwner {
-        require(continuousSale);
-
-        price = _price;
-        PriceChange(_price);
+    function setRate(uint256 _rate) onlyOwner {
+        require(isFinalized);
+        rate = _rate;
+        RateChange(_rate);
     }
 
     function startContinuousSale() onlyOwner {
+        require(isFinalized);
         continuousSale = true;
     }
 
-    function assignFoundationTokens() internal {
+    function hasEnded() constant returns(bool) {
+        return isFinalized || super.hasEnded();
+    }
+
+    function finalize() onlyOwner {
+        require(!isFinalized);
+
+        finalization();
+        Finalized();
+
+        isFinalized = true;
+    }
+
+    function finalization() internal {
         uint256 totalSupply = token.totalSupply();
         uint256 finalSupply = TOTAL_SHARE.mul(totalSupply).div(CROWDSALE_SHARE);
 
         // emit tokens for the foundation
         token.mint(wallet, FOUNDATION_SHARE.mul(finalSupply).div(TOTAL_SHARE));
-    }
 
-    function finalization() internal {
-        assignFoundationTokens();
-        super.finalization();
+        // initialize issuance 
+        uint256 annualIssuance = finalSupply.div(100).mul(INFLATION);
+        issuance = annualIssuance.div(1 years).mul(BUCKET_SIZE);
+
+        // NOTE: cannot call super here because it would finish minting and
+        // the continuous sale would not be able to proceed
     }
 }
