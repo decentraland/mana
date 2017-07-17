@@ -48,7 +48,7 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, in
     await crowdsale.startContinuousSale({from: purchaser}).should.be.rejectedWith(EVMThrow)
   })
 
-  it('rate during auction should at a fixed step every block', async function () {
+  it('rate during auction should decrease at a fixed step every block', async function () {
     let balance
 
     await advanceToBlock(startBlock - 1)
