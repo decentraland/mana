@@ -1,4 +1,6 @@
-Decentraland Crowdsale
-======================
+![](https://raw.githubusercontent.com/decentraland/web/gh-pages/img/decentraland.ico)
 
-Solidity smart contracts for the Decentraland Crowdsale
+Decentraland MANA Token
+=======================
+
+Solidity smart contracts for the Decentraland Crowdsale and MANA Token
