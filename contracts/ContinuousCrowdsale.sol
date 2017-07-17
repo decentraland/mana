@@ -51,20 +51,20 @@ contract ContinuousCrowdsale is Crowdsale {
     }
 
     function processPurchase(address beneficiary) internal returns(uint256) {
-		uint256 weiAmount = msg.value;
-		uint256 updatedWeiRaised = weiRaised.add(weiAmount);
+        uint256 weiAmount = msg.value;
+        uint256 updatedWeiRaised = weiRaised.add(weiAmount);
 
-		// calculate token amount to be created
-		uint256 tokens = weiAmount.mul(rate);
+        // calculate token amount to be created
+        uint256 tokens = weiAmount.mul(rate);
 
-		// update state
-		weiRaised = updatedWeiRaised;
+        // update state
+        weiRaised = updatedWeiRaised;
 
-		token.mint(beneficiary, tokens);
-		TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
+        token.mint(beneficiary, tokens);
+        TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
 
-		forwardFunds();
+        forwardFunds();
 
-		return tokens;
+        return tokens;
     }
 }
