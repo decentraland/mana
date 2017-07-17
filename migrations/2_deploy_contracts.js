@@ -1,6 +1,5 @@
-var ConvertLib = artifacts.require("./ConvertLib.sol");
-var Crowdsale = artifacts.require("./Crowdsale.sol");
+const MANACrowdsale = artifacts.require("./MANACrowdsale.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(Crowdsale);
+  // deployer.deploy(MANACrowdsale);
 };

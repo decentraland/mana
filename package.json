@@ -1,0 +1,37 @@
+{
+  "name": "decentraland-crowdsale",
+  "version": "1.0.0",
+  "description": "Solidity Contracts for the Decentraland MANA Token",
+  "main": "y",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "zeppelin-solidity": "^1.1.0"
+  },
+  "devDependencies": {
+    "babel-polyfill": "^6.23.0",
+    "babel-preset-env": "^1.6.0",
+    "babel-register": "^6.24.1"
+  },
+  "scripts": {
+    "test": "truffle test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/decentraland/mana.git"
+  },
+  "keywords": [
+    "decentraland",
+    "mana",
+    "solidity",
+    "truffle",
+    "crowdsale"
+  ],
+  "author": "Federico Bond",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/decentraland/mana/issues"
+  },
+  "homepage": "https://github.com/decentraland/mana#readme"
+}
