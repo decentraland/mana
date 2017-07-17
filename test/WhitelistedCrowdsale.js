@@ -6,7 +6,6 @@ const WhitelistedCrowdsale = artifacts.require('./helpers/WhitelistedCrowdsaleIm
 const MintableToken = artifacts.require('zeppelin-solidity/contracts/tokens/MintableToken')
 
 contract('WhitelistCrowdsale', function ([_, owner, wallet, beneficiary, sender]) {
-
   const rate = new BigNumber(1000)
 
   beforeEach(async function () {
@@ -19,7 +18,6 @@ contract('WhitelistCrowdsale', function ([_, owner, wallet, beneficiary, sender]
   })
 
   describe('whitelisting', function () {
-
     const amount = ether(1500)
 
     it('should add address to whitelist', async function () {
@@ -38,7 +36,5 @@ contract('WhitelistCrowdsale', function ([_, owner, wallet, beneficiary, sender]
       await this.crowdsale.addToWhitelist(sender, {from: owner})
       await this.crowdsale.buyTokens(beneficiary, {value: amount, from: sender}).should.be.fulfilled
     })
-
   })
-
 })

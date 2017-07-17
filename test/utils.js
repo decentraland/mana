@@ -5,11 +5,10 @@ require('chai')
   .use(require('chai-bignumber')(BigNumber))
   .should()
 
-
-function rpcCall(call) {
+function rpcCall (call) {
   call = Object.assign({
     jsonrpc: '2.0',
-    id: Date.now(),
+    id: Date.now()
   }, call)
 
   return new Promise((resolve, reject) => {
@@ -19,16 +18,16 @@ function rpcCall(call) {
   })
 }
 
-export function advanceBlock() {
+export function advanceBlock () {
   return rpcCall({ method: 'evm_mine' })
 }
 
-export function increaseTime(seconds) {
+export function increaseTime (seconds) {
   return rpcCall({ method: 'evm_increaseTime', params: [seconds] })
 }
 
 // Advances the block number so that the last mined block is `number`.
-export async function advanceToBlock(number) {
+export async function advanceToBlock (number) {
   if (web3.eth.blockNumber > number) {
     throw Error(`block number ${number} is in the past (current is ${web3.eth.blockNumber})`)
   }
@@ -39,7 +38,7 @@ export async function advanceToBlock(number) {
 }
 
 // Advances the block number so that the last mined block is `number`.
-export async function advanceToTime(timestamp) {
+export async function advanceToTime (timestamp) {
   const block = await web3.eth.getBlock('latest')
   if (block.timestamp > timestamp) {
     throw Error(`time ${timestamp} is in the past (current is ${block.timestamp})`)
@@ -49,11 +48,11 @@ export async function advanceToTime(timestamp) {
 }
 
 // Advances the block number so that the last mined block is `number`.
-export async function advanceTime(time) {
+export async function advanceTime (time) {
   await increaseTime(time)
   await advanceBlock()
 }
 
-export function ether(n) {
+export function ether (n) {
   return new web3.BigNumber(web3.toWei(n, 'ether'))
 }

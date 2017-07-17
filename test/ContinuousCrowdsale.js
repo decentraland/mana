@@ -1,23 +1,23 @@
-'use strict';
+'use strict'
 
 const { advanceTime, advanceToBlock, ether, EVMThrow } = require('./utils')
-const ContinuousCrowdsaleMock = artifacts.require("./helpers/ContinuousCrowdsaleMock.sol")
+const ContinuousCrowdsaleMock = artifacts.require('./helpers/ContinuousCrowdsaleMock.sol')
 
 const BigNumber = web3.BigNumber
 
-contract('ContinuousCrowdsale', function([_, investor, wallet, purchaser]) {
-  const rate = new web3.BigNumber(1)
-	const value = ether(1)
+contract('ContinuousCrowdsale', function ([_, investor, wallet, purchaser]) {
+  const rate = new BigNumber(1)
+  const value = ether(1)
 
   let startBlock, endBlock
   let crowdsale
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     startBlock = web3.eth.blockNumber + 10
     endBlock = web3.eth.blockNumber + 20
 
     crowdsale = await ContinuousCrowdsaleMock.new(startBlock, endBlock, rate, wallet)
-  });
+  })
 
   it('should start with continuous sale disabled', async function () {
     const enabled = await crowdsale.continuousSale()
@@ -49,7 +49,7 @@ contract('ContinuousCrowdsale', function([_, investor, wallet, purchaser]) {
 
       await crowdsale.setIssuance(value)
       await crowdsale.startContinuousSale()
-        
+
       await crowdsale.send(value).should.be.fulfilled
     })
 
@@ -58,7 +58,7 @@ contract('ContinuousCrowdsale', function([_, investor, wallet, purchaser]) {
 
       await crowdsale.setIssuance(value.minus(100))
       await crowdsale.startContinuousSale()
-        
+
       await crowdsale.send(value).should.be.rejectedWith(EVMThrow)
     })
 
@@ -70,7 +70,7 @@ contract('ContinuousCrowdsale', function([_, investor, wallet, purchaser]) {
 
       await crowdsale.setIssuance(value)
       await crowdsale.startContinuousSale()
-        
+
       await crowdsale.send(value).should.be.fulfilled
       await crowdsale.send(value).should.be.rejectedWith(EVMThrow)
 
@@ -78,4 +78,4 @@ contract('ContinuousCrowdsale', function([_, investor, wallet, purchaser]) {
       await crowdsale.send(value).should.be.fulfilled
     })
   })
-});
+})

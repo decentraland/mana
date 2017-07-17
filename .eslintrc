@@ -1,0 +1,12 @@
+{
+  "extends": ["standard"],
+  "env": {
+    "node": true,
+    "jasmine": true
+  },
+  "globals": {
+    "web3": false,
+    "artifacts": false,
+    "contract": false
+  }
+}
