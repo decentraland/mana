@@ -13,6 +13,9 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, in
   const preferentialRate = new BigNumber(2000)
   const value = ether(1)
 
+  const expectedFoundationTokens = new BigNumber(6000)
+  const expectedTokenSupply = new BigNumber(10000)
+
   let startBlock, endBlock
   let crowdsale, token
 
@@ -80,7 +83,10 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, in
     await crowdsale.buyTokens(investor, {value: 4, from: purchaser})
     await crowdsale.finalize()
     const balance = await token.balanceOf(wallet)
-    balance.should.be.bignumber.equal(new BigNumber(6000))
+    balance.should.be.bignumber.equal(expectedFoundationTokens)
+
+    const totalSupply = await token.totalSupply()
+    totalSupply.should.be.bignumber.equal(expectedTokenSupply)
   })
 
   it('auction can be finalized early by owner', async function () {
