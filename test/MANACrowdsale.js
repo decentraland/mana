@@ -88,6 +88,23 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, in
     await crowdsale.finalize().should.be.fulfilled
   })
 
+  it('should initialize a continuous issuance rate during finalization', async function () {
+    await advanceToBlock(startBlock - 1)
+
+    // since price at first block is 1000, total tokens emitted will be 4000
+    await crowdsale.buyTokens(investor, {value: 400, from: purchaser})
+    await crowdsale.finalize()
+
+    // total tokens emitted will be 1000000 (400000 to investor and 600000 to
+    // foundation) so issuance must be:
+    //
+    // seconds in 12 hours: 43200
+    // seconds in a year: 31536000
+    // 1000000 * 0.08 * 43200 / 31536000 = 109
+    const issuance = await crowdsale.issuance()
+    issuance.should.be.bignumber.equal(new BigNumber(109))
+  })
+
   it('tokens during continuous sale should be priced at fixed rate', async function () {
     await advanceToBlock(endBlock)
     await crowdsale.finalize()
