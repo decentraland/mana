@@ -76,6 +76,28 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, in
     balance.should.be.bignumber.equal(value.mul(preferentialRate))
   })
 
+  it('owner can set the price for a particular buyer', async function() {
+    const preferentialRateForBuyer = new BigNumber(200)
+    await crowdsale.setBuyerRate(investor, preferentialRateForBuyer)
+
+    await crowdsale.send(value, {from: investor})
+    const balance = await token.balanceOf(investor)
+    balance.should.be.bignumber.equal(value.mul(preferentialRateForBuyer))
+    balance.should.not.be.bignumber.equal(value.mul(preferentialRate))
+  })
+
+  it('beneficiary is not the same as buyer', async function() {
+    const preferentialRateForBuyer = new BigNumber(200)
+    const invalidRate = new BigNumber(100)
+    const beneficiary = investor2
+    await crowdsale.setBuyerRate(investor, preferentialRateForBuyer)
+    await crowdsale.setBuyerRate(beneficiary, invalidRate)
+
+    await crowdsale.buyTokens(beneficiary, {value, from: investor})
+    const balance = await token.balanceOf(beneficiary)
+    balance.should.be.bignumber.equal(value.mul(preferentialRateForBuyer))
+  })
+
   it('tokens should be assigned correctly to foundation when finalized', async function () {
     await advanceToBlock(startBlock - 1)
 

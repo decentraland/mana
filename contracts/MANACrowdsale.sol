@@ -15,8 +15,11 @@ contract MANACrowdsale is ContinuousCrowdsale, CappedCrowdsale, WhitelistedCrowd
     uint256 public constant CROWDSALE_SHARE = 40;
     uint256 public constant FOUNDATION_SHARE = 60;
 
-    // price at which whitelisted investors will be able to buy tokens
+    // price at which whitelisted buyers will be able to buy tokens
     uint256 public preferentialRate;
+
+    // customize the rate for each whitelisted buyer
+    mapping (address => uint256) public buyerRate;
 
     // change of price in every block during the initial coin offering
     uint256 public rateChange;
@@ -42,15 +45,27 @@ contract MANACrowdsale is ContinuousCrowdsale, CappedCrowdsale, WhitelistedCrowd
         return new MANAToken();
     }
 
-    function getRate() internal returns(uint256) {
-        // whitelisted investors can purchase at preferential price before crowdsale ends
-        if (isWhitelisted(msg.sender) && !hasEnded()) {
-            return preferentialRate;
-        }
+    function setBuyerRate(address buyer, uint256 rate) onlyOwner {
+        require(buyer != 0);
+        require(rate != 0);
 
+        buyerRate[buyer] = rate;
+    }
+
+    function getRate() internal returns(uint256) {
         // return the current price if we are in continuous sale
         if (continuousSale) {
             return rate;
+        }
+
+        // some early buyers are offered a discount on the crowdsale price
+        if (buyerRate[msg.sender] != 0) {
+            return buyerRate[msg.sender];
+        }
+
+        // whitelisted buyers can purchase at preferential price before crowdsale ends
+        if (isWhitelisted(msg.sender) && !hasEnded()) {
+            return preferentialRate;
         }
 
         // otherwise compute the price for the auction
