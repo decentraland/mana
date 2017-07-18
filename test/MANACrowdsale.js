@@ -1,6 +1,6 @@
 'use strict'
 
-const { advanceToBlock, ether, EVMThrow } = require('./utils')
+const { advanceToBlock, ether, should, EVMThrow } = require('./utils')
 const MANACrowdsale = artifacts.require('./MANACrowdsale.sol')
 const MANAToken = artifacts.require('./MANAToken.sol')
 
@@ -131,7 +131,11 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, in
 
     await crowdsale.finalize()
 
-    await crowdsale.setRate(newRate).should.be.fulfilled
+    const { logs } = await crowdsale.setRate(newRate)
+
+    const event = logs.find(e => e.event === 'RateChange')
+    should.exist(event)
+
     const updatedRate = await crowdsale.rate()
     updatedRate.should.be.bignumber.equal(newRate)
   })
