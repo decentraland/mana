@@ -72,7 +72,7 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, in
     balance.should.be.bignumber.equal(value.mul(rateAtBlock5))
   })
 
-  it.only('whitelisted buyers should access tokens at reduced price until end of auction', async function () {
+  it('whitelisted buyers should access tokens at reduced price until end of auction', async function () {
     await crowdsale.addToWhitelist(investor)
 
     await crowdsale.buyTokens(investor, {value, from: investor})
