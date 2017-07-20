@@ -33,7 +33,7 @@ contract('WhitelistCrowdsale', function ([_, owner, wallet, beneficiary, sender]
       await this.crowdsale.buyTokens(beneficiary, {value: amount, from: sender}).should.be.rejectedWith(EVMThrow)
     })
 
-    it.skip('should sell to whitelisted address', async function () {
+    it('should sell to whitelisted address', async function () {
       await this.crowdsale.addToWhitelist(sender, {from: owner})
       await this.crowdsale.buyTokens(beneficiary, {value: amount, from: sender}).should.be.fulfilled
     })
