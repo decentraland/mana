@@ -45,7 +45,7 @@ contract MANACrowdsale is ContinuousCrowdsale, CappedCrowdsale, WhitelistedCrowd
         return new MANAToken();
     }
 
-    function setBuyerRate(address buyer, uint256 rate) onlyOwner {
+    function setBuyerRate(address buyer, uint256 rate) onlyOwner public {
         require(buyer != 0);
         require(rate != 0);
 
@@ -92,18 +92,18 @@ contract MANACrowdsale is ContinuousCrowdsale, CappedCrowdsale, WhitelistedCrowd
         return tokens;
     }
 
-    function setWallet(address _wallet) onlyOwner {
+    function setWallet(address _wallet) onlyOwner public {
         require(_wallet != 0x0);
         wallet = _wallet;
     }
 
-    function setRate(uint256 _rate) onlyOwner {
+    function setRate(uint256 _rate) onlyOwner public {
         require(isFinalized);
         rate = _rate;
         RateChange(_rate);
     }
 
-    function startContinuousSale() onlyOwner {
+    function startContinuousSale() onlyOwner public {
         require(isFinalized);
         continuousSale = true;
     }

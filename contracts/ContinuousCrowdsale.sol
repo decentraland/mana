@@ -22,7 +22,7 @@ contract ContinuousCrowdsale is Crowdsale {
     // max amount of tokens to mint per time bucket
     uint256 public issuance = 0;
 
-    function buyTokens(address beneficiary) payable {
+    function buyTokens(address beneficiary) public payable {
         require(beneficiary != 0x0);
 
         if (continuousSale) {
