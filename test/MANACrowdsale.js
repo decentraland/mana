@@ -1,3 +1,4 @@
+// @flow
 'use strict'
 
 const { advanceToBlock, ether, should, EVMThrow } = require('./utils')

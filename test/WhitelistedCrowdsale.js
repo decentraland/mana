@@ -1,3 +1,4 @@
+// @flow
 import { ether, EVMThrow } from './utils'
 
 const BigNumber = web3.BigNumber
