@@ -15,6 +15,7 @@ contract WhitelistedCrowdsale is Crowdsale, Ownable {
     mapping (address => bool) public whitelist;
 
     function addToWhitelist(address investor) public onlyOwner {
+        require(investor != 0x0);
         whitelist[investor] = true; 
     }
 
