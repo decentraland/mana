@@ -27,8 +27,10 @@ contract MANACrowdsale is ContinuousCrowdsale, CappedCrowdsale, WhitelistedCrowd
     event RateChange(uint256 amount);
 
     function MANACrowdsale(
-        uint256 _startBlock, uint256 _endBlock,
-        uint256 _rate, uint256 _rateStepDecrease,
+        uint256 _startBlock,
+        uint256 _endBlock,
+        uint256 _rate,
+        uint256 _rateStepDecrease,
         uint256 _preferentialRate,
         address _wallet
     )
@@ -37,6 +39,10 @@ contract MANACrowdsale is ContinuousCrowdsale, CappedCrowdsale, WhitelistedCrowd
         FinalizableCrowdsale()
         Crowdsale(_startBlock, _endBlock, _rate, _wallet)
     {
+        require(_rateStepDecrease > 0);
+        require(_preferentialRate > 0);
+        require(_rate > _rateStepDecrease * (_endBlock - _startBlock));
+
         rateStepDecrease = _rateStepDecrease;
         preferentialRate = _preferentialRate;
     }
@@ -98,7 +104,9 @@ contract MANACrowdsale is ContinuousCrowdsale, CappedCrowdsale, WhitelistedCrowd
     }
 
     function setRate(uint256 _rate) onlyOwner public {
+        require(_rate > 0);
         require(isFinalized);
+
         rate = _rate;
         RateChange(_rate);
     }

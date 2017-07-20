@@ -10,7 +10,7 @@ const BigNumber = web3.BigNumber
 contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, investor2, purchaser2]) {
   const rate = new BigNumber(1000)
   const newRate = new BigNumber(500)
-  const rateChange = new BigNumber(100)
+  const rateStepDecrease = new BigNumber(10)
   const preferentialRate = new BigNumber(2000)
   const value = ether(1)
 
@@ -25,7 +25,12 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, in
     endBlock = web3.eth.blockNumber + 20
 
     crowdsale = await MANACrowdsale.new(
-      startBlock, endBlock, rate, rateChange, preferentialRate, wallet
+      startBlock,
+      endBlock,
+      rate,
+      rateStepDecrease,
+      preferentialRate,
+      wallet
     )
     token = MANAToken.at(await crowdsale.token())
   })
@@ -68,7 +73,7 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, in
 
     await crowdsale.buyTokens(investor2, {value, from: purchaser2})
     balance = await token.balanceOf(investor2)
-    const rateAtBlock5 = rate.minus(rateChange.mul(5))
+    const rateAtBlock5 = rate.minus(rateStepDecrease.mul(5))
     balance.should.be.bignumber.equal(value.mul(rateAtBlock5))
   })
 
