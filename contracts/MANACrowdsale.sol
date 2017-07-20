@@ -108,19 +108,6 @@ contract MANACrowdsale is ContinuousCrowdsale, CappedCrowdsale, WhitelistedCrowd
         continuousSale = true;
     }
 
-    function hasEnded() constant returns(bool) {
-        return isFinalized || super.hasEnded();
-    }
-
-    function finalize() onlyOwner {
-        require(!isFinalized);
-
-        finalization();
-        Finalized();
-
-        isFinalized = true;
-    }
-
     function finalization() internal {
         uint256 totalSupply = token.totalSupply();
         uint256 finalSupply = TOTAL_SHARE.mul(totalSupply).div(CROWDSALE_SHARE);

@@ -42,7 +42,10 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, in
 
   it('owner should be able to start continuous sale', async function () {
     await crowdsale.startContinuousSale().should.be.rejectedWith(EVMThrow)
+
+    await advanceToBlock(endBlock)
     await crowdsale.finalize()
+
     await crowdsale.startContinuousSale().should.be.fulfilled
     const enabled = await crowdsale.continuousSale()
     enabled.should.equal(true)
@@ -104,7 +107,10 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, in
 
     // since price at first block is 1000, total tokens emitted will be 4000
     await crowdsale.buyTokens(investor, {value: 4, from: purchaser})
+
+    await advanceToBlock(endBlock)
     await crowdsale.finalize()
+
     const balance = await token.balanceOf(wallet)
     balance.should.be.bignumber.equal(expectedFoundationTokens)
 
@@ -112,16 +118,13 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, in
     totalSupply.should.be.bignumber.equal(expectedTokenSupply)
   })
 
-  it('auction can be finalized early by owner', async function () {
-    await advanceToBlock(startBlock + 5)
-    await crowdsale.finalize().should.be.fulfilled
-  })
-
   it('should initialize a continuous issuance rate during finalization', async function () {
     await advanceToBlock(startBlock - 1)
 
     // since price at first block is 1000, total tokens emitted will be 4000
     await crowdsale.buyTokens(investor, {value: 400, from: purchaser})
+
+    await advanceToBlock(endBlock)
     await crowdsale.finalize()
 
     // total tokens emitted will be 1000000 (400000 to investor and 600000 to
