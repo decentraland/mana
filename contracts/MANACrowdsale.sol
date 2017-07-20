@@ -22,13 +22,13 @@ contract MANACrowdsale is ContinuousCrowdsale, CappedCrowdsale, WhitelistedCrowd
     mapping (address => uint256) public buyerRate;
 
     // change of price in every block during the initial coin offering
-    uint256 public rateChange;
+    uint256 public rateStepDecrease;
 
     event RateChange(uint256 amount);
 
     function MANACrowdsale(
         uint256 _startBlock, uint256 _endBlock,
-        uint256 _rate, uint256 _rateChange,
+        uint256 _rate, uint256 _rateStepDecrease,
         uint256 _preferentialRate,
         address _wallet
     )
@@ -37,7 +37,7 @@ contract MANACrowdsale is ContinuousCrowdsale, CappedCrowdsale, WhitelistedCrowd
         FinalizableCrowdsale()
         Crowdsale(_startBlock, _endBlock, _rate, _wallet)
     {
-        rateChange = _rateChange;
+        rateStepDecrease = _rateStepDecrease;
         preferentialRate = _preferentialRate;
     }
 
@@ -69,7 +69,7 @@ contract MANACrowdsale is ContinuousCrowdsale, CappedCrowdsale, WhitelistedCrowd
         }
 
         // otherwise compute the price for the auction
-        return rate.sub(rateChange.mul(block.number - startBlock));
+        return rate.sub(rateStepDecrease.mul(block.number - startBlock));
     }
 
     // low level token purchase function
