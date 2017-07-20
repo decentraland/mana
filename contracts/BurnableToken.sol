@@ -15,6 +15,8 @@ contract BurnableToken is StandardToken {
      * @param _value The amount of tokens to burn. 
      */
     function burn(uint256 _value) public {
+        require(_value > 0);
+
         address burner = msg.sender;
         balances[burner] = balances[burner].sub(_value);
         totalSupply = totalSupply.sub(_value);
