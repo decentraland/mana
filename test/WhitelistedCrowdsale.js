@@ -19,7 +19,7 @@ contract('WhitelistCrowdsale', function ([_, owner, wallet, beneficiary, sender]
   })
 
   describe('whitelisting', function () {
-    const amount = ether(1500)
+    const amount = ether(1)
 
     it('should add address to whitelist', async function () {
       let whitelisted = await this.crowdsale.isWhitelisted(sender)

@@ -72,19 +72,21 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, in
     balance.should.be.bignumber.equal(value.mul(rateAtBlock5))
   })
 
-  it('whitelisted buyers should access tokens at reduced price until end of auction', async function () {
+  it.only('whitelisted buyers should access tokens at reduced price until end of auction', async function () {
     await crowdsale.addToWhitelist(investor)
 
-    await crowdsale.send(value, {from: investor})
+    await crowdsale.buyTokens(investor, {value, from: investor})
     const balance = await token.balanceOf(investor)
     balance.should.be.bignumber.equal(value.mul(preferentialRate))
   })
 
   it('owner can set the price for a particular buyer', async function() {
+    await crowdsale.addToWhitelist(investor)
+
     const preferentialRateForBuyer = new BigNumber(200)
     await crowdsale.setBuyerRate(investor, preferentialRateForBuyer)
 
-    await crowdsale.send(value, {from: investor})
+    await crowdsale.buyTokens(investor, {value, from: investor})
     const balance = await token.balanceOf(investor)
     balance.should.be.bignumber.equal(value.mul(preferentialRateForBuyer))
     balance.should.not.be.bignumber.equal(value.mul(preferentialRate))
@@ -96,6 +98,8 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, in
     const beneficiary = investor2
     await crowdsale.setBuyerRate(investor, preferentialRateForBuyer)
     await crowdsale.setBuyerRate(beneficiary, invalidRate)
+
+    await crowdsale.addToWhitelist(investor)
 
     await crowdsale.buyTokens(beneficiary, {value, from: investor})
     const balance = await token.balanceOf(beneficiary)
