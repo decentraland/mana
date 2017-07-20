@@ -46,8 +46,10 @@ contract ContinuousCrowdsale is Crowdsale {
     }
 
     function checkContinuousPurchase(uint256 tokens) internal {
-        bucketAmount += tokens;
-        require(bucketAmount <= issuance);
+        uint256 updatedBucketAmount = bucketAmount.add(tokens);
+        require(updatedBucketAmount <= issuance);
+
+        bucketAmount = updatedBucketAmount;
     }
 
     function processPurchase(address beneficiary) internal returns(uint256) {
