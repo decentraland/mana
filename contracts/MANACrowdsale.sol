@@ -64,7 +64,7 @@ contract MANACrowdsale is ContinuousCrowdsale, CappedCrowdsale, WhitelistedCrowd
         }
 
         // whitelisted buyers can purchase at preferential price before crowdsale ends
-        if (isWhitelisted(msg.sender) && !hasEnded()) {
+        if (isWhitelisted(msg.sender)) {
             return preferentialRate;
         }
 
