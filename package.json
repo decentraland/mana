@@ -24,10 +24,12 @@
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-standard": "^3.0.1",
     "ethereumjs-testrpc": "^4.0.1",
+    "solidity-coverage": "^0.1.8",
     "truffle": "^3.4.5"
   },
   "scripts": {
     "test": "./scripts/test.sh",
+    "coverage": "./scripts/coverage.sh",
     "eslint": "eslint test/"
   },
   "repository": {
