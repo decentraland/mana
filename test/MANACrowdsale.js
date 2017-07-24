@@ -85,6 +85,17 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, in
     balance.should.be.bignumber.equal(value.mul(preferentialRate))
   })
 
+  it('whitelisted big whale investor should not exceed the cap', async function () {
+    const cap = (await crowdsale.cap());
+    const overCap = cap.mul(2);
+    await crowdsale.addToWhitelist(investor);
+    await crowdsale.buyTokens(investor, {value: overCap, from: investor}).should.be.rejectedWith(EVMThrow);
+    const balance = await token.balanceOf(investor);
+    const raised = await crowdsale.weiRaised();
+    balance.should.be.bignumber.equal(0);
+    raised.should.be.bignumber.most(cap);
+  })
+
   it('owner can set the price for a particular buyer', async function() {
     await crowdsale.addToWhitelist(investor)
 

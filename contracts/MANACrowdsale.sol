@@ -131,4 +131,12 @@ contract MANACrowdsale is ContinuousCrowdsale, CappedCrowdsale, WhitelistedCrowd
         // NOTE: cannot call super here because it would finish minting and
         // the continuous sale would not be able to proceed
     }
+
+    // overriding Crowdsale#validPurchase to merge logic for period, cap and whitelisting
+    // @return true if investors can buy at the moment
+    function validPurchase() internal constant returns (bool) {
+        //As WhitelistedCrowdsale is unaware about the cap we need to manually reintroduce the check
+        bool withinCap = weiRaised.add(msg.value) <= cap;
+        return super.validPurchase() && withinCap;
+    }
 }
