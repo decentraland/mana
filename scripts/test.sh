@@ -20,5 +20,5 @@ if [ ! $trpc_running ]; then
 fi
 ./node_modules/.bin/truffle test "$@"
 if [ ! $trpc_running ]; then
-  kill -9 $trpc_pid
+  kill -9 $testrpc_pid
 fi
