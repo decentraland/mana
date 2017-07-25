@@ -6,7 +6,7 @@ import 'zeppelin-solidity/contracts/crowdsale/Crowdsale.sol';
 /**
  * @title WhitelistedCrowdsale
  * @dev Extension of Crowsdale where an owner can whitelist addresses
- * which can invest in crowdsale before it opens to the public 
+ * which can buy in crowdsale before it opens to the public 
  */
 contract WhitelistedCrowdsale is Crowdsale, Ownable {
     using SafeMath for uint256;
@@ -14,18 +14,18 @@ contract WhitelistedCrowdsale is Crowdsale, Ownable {
     // list of addresses that can purchase before crowdsale opens
     mapping (address => bool) public whitelist;
 
-    function addToWhitelist(address investor) public onlyOwner {
-        require(investor != 0x0);
-        whitelist[investor] = true; 
+    function addToWhitelist(address buyer) public onlyOwner {
+        require(buyer != 0x0);
+        whitelist[buyer] = true; 
     }
 
-    // @return true if investor is whitelisted
-    function isWhitelisted(address investor) public constant returns (bool) {
-        return whitelist[investor];
+    // @return true if buyer is whitelisted
+    function isWhitelisted(address buyer) public constant returns (bool) {
+        return whitelist[buyer];
     }
 
     // overriding Crowdsale#validPurchase to add whitelist logic
-    // @return true if investors can buy at the moment
+    // @return true if buyers can buy at the moment
     function validPurchase() internal constant returns (bool) {
         // [TODO] issue with overriding and associativity of logical operators
         return super.validPurchase() || (!hasEnded() && isWhitelisted(msg.sender)); 
