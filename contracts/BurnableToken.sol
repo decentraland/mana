@@ -1,20 +1,22 @@
 pragma solidity ^0.4.11;
 
 import 'zeppelin-solidity/contracts/token/StandardToken.sol';
+import "zeppelin-solidity/contracts/ownership/Ownable.sol";
+
 
 /**
  * @title Burnable Token
  * @dev A token that can be irreversibly burned.
  */
-contract BurnableToken is StandardToken {
+contract BurnableToken is StandardToken, Ownable {
 
     event Burn(address indexed burner, uint256 value);
 
     /**
      * @dev Burns a specified amount of tokens.
-     * @param _value The amount of tokens to burn. 
+     * @param _value The amount of tokens to burn.
      */
-    function burn(uint256 _value) public {
+    function burn(uint256 _value) onlyOwner {
         require(_value > 0);
 
         address burner = msg.sender;
