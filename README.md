@@ -1,4 +1,4 @@
-![](https://raw.githubusercontent.com/decentraland/web/gh-pages/img/decentraland.ico)
+![](https://decentraland.org/favicon.ico)
 
 Decentraland MANA Token
 =======================
