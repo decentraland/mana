@@ -124,7 +124,6 @@ contract MANACrowdsale is ContinuousCrowdsale, WhitelistedCrowdsale, CappedCrowd
         token.mint(wallet, FOUNDATION_SHARE.mul(finalSupply).div(TOTAL_SHARE));
 
         // initialize issuance 
-        // TODO: possibility of overflow in these operations should be analized
         uint256 annualIssuance = finalSupply.mul(INFLATION).div(100);
         issuance = annualIssuance.mul(BUCKET_SIZE).div(1 years);
 
