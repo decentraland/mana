@@ -6,7 +6,7 @@ const ContinuousCrowdsaleMock = artifacts.require('./helpers/ContinuousCrowdsale
 
 const BigNumber = web3.BigNumber
 
-contract('ContinuousCrowdsale', function ([_, investor, wallet, purchaser]) {
+contract('ContinuousCrowdsale', function ([_, buyer, wallet, purchaser]) {
   const rate = new BigNumber(1)
   const value = ether(1)
 
@@ -28,19 +28,19 @@ contract('ContinuousCrowdsale', function ([_, investor, wallet, purchaser]) {
   describe('initial crowdsale rules', function () {
     it('should reject payments before start', async function () {
       await crowdsale.send(value).should.be.rejectedWith(EVMThrow)
-      await crowdsale.buyTokens(investor, value, {from: purchaser}).should.be.rejectedWith(EVMThrow)
+      await crowdsale.buyTokens(buyer, value, {from: purchaser}).should.be.rejectedWith(EVMThrow)
     })
 
     it('should accept payments after start', async function () {
       await advanceToBlock(startBlock - 1)
       await crowdsale.send(value).should.be.fulfilled
-      await crowdsale.buyTokens(investor, {value: value, from: purchaser}).should.be.fulfilled
+      await crowdsale.buyTokens(buyer, {value: value, from: purchaser}).should.be.fulfilled
     })
 
     it('should reject payments after end', async function () {
       await advanceToBlock(endBlock)
       await crowdsale.send(value).should.be.rejectedWith(EVMThrow)
-      await crowdsale.buyTokens(investor, {value: value, from: purchaser}).should.be.rejectedWith(EVMThrow)
+      await crowdsale.buyTokens(buyer, {value: value, from: purchaser}).should.be.rejectedWith(EVMThrow)
     })
   })
 

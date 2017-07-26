@@ -7,7 +7,7 @@ const MANAToken = artifacts.require('./MANAToken.sol')
 
 const BigNumber = web3.BigNumber
 
-contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, investor2, purchaser2]) {
+contract('MANACrowdsale', function ([_, wallet, wallet2, buyer, purchaser, buyer2, purchaser2]) {
   const rate = new BigNumber(1000)
   const newRate = new BigNumber(500)
   const rateStepDecrease = new BigNumber(10)
@@ -65,23 +65,23 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, in
 
     await advanceToBlock(startBlock - 1)
 
-    await crowdsale.buyTokens(investor, {value, from: purchaser})
-    balance = await token.balanceOf(investor)
+    await crowdsale.buyTokens(buyer, {value, from: purchaser})
+    balance = await token.balanceOf(buyer)
     balance.should.be.bignumber.equal(value.mul(rate))
 
     await advanceToBlock(startBlock + 4)
 
-    await crowdsale.buyTokens(investor2, {value, from: purchaser2})
-    balance = await token.balanceOf(investor2)
+    await crowdsale.buyTokens(buyer2, {value, from: purchaser2})
+    balance = await token.balanceOf(buyer2)
     const rateAtBlock5 = rate.minus(rateStepDecrease.mul(5))
     balance.should.be.bignumber.equal(value.mul(rateAtBlock5))
   })
 
   it('whitelisted buyers should access tokens at reduced price until end of auction', async function () {
-    await crowdsale.addToWhitelist(investor)
+    await crowdsale.addToWhitelist(buyer)
 
-    await crowdsale.buyTokens(investor, {value, from: investor})
-    const balance = await token.balanceOf(investor)
+    await crowdsale.buyTokens(buyer, {value, from: buyer})
+    const balance = await token.balanceOf(buyer)
     balance.should.be.bignumber.equal(value.mul(preferentialRate))
   })
 
@@ -97,13 +97,13 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, in
   })
 
   it('owner can set the price for a particular buyer', async function() {
-    await crowdsale.addToWhitelist(investor)
+    await crowdsale.addToWhitelist(buyer)
 
     const preferentialRateForBuyer = new BigNumber(200)
-    await crowdsale.setBuyerRate(investor, preferentialRateForBuyer)
+    await crowdsale.setBuyerRate(buyer, preferentialRateForBuyer)
 
-    await crowdsale.buyTokens(investor, {value, from: investor})
-    const balance = await token.balanceOf(investor)
+    await crowdsale.buyTokens(buyer, {value, from: buyer})
+    const balance = await token.balanceOf(buyer)
     balance.should.be.bignumber.equal(value.mul(preferentialRateForBuyer))
     balance.should.not.be.bignumber.equal(value.mul(preferentialRate))
   })
@@ -111,13 +111,13 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, in
   it('beneficiary is not the same as buyer', async function() {
     const preferentialRateForBuyer = new BigNumber(200)
     const invalidRate = new BigNumber(100)
-    const beneficiary = investor2
-    await crowdsale.setBuyerRate(investor, preferentialRateForBuyer)
+    const beneficiary = buyer2
+    await crowdsale.setBuyerRate(buyer, preferentialRateForBuyer)
     await crowdsale.setBuyerRate(beneficiary, invalidRate)
 
-    await crowdsale.addToWhitelist(investor)
+    await crowdsale.addToWhitelist(buyer)
 
-    await crowdsale.buyTokens(beneficiary, {value, from: investor})
+    await crowdsale.buyTokens(beneficiary, {value, from: buyer})
     const balance = await token.balanceOf(beneficiary)
     balance.should.be.bignumber.equal(value.mul(preferentialRateForBuyer))
   })
@@ -126,7 +126,7 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, in
     await advanceToBlock(startBlock - 1)
 
     // since price at first block is 1000, total tokens emitted will be 4000
-    await crowdsale.buyTokens(investor, {value: 4, from: purchaser})
+    await crowdsale.buyTokens(buyer, {value: 4, from: purchaser})
 
     await advanceToBlock(endBlock)
     await crowdsale.finalize()
@@ -142,12 +142,12 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, in
     await advanceToBlock(startBlock - 1)
 
     // since price at first block is 1000, total tokens emitted will be 4000
-    await crowdsale.buyTokens(investor, {value: 400, from: purchaser})
+    await crowdsale.buyTokens(buyer, {value: 400, from: purchaser})
 
     await advanceToBlock(endBlock)
     await crowdsale.finalize()
 
-    // total tokens emitted will be 1000000 (400000 to investor and 600000 to
+    // total tokens emitted will be 1000000 (400000 to buyer and 600000 to
     // foundation) so issuance must be:
     //
     // seconds in 12 hours: 43200
@@ -165,8 +165,8 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, investor, purchaser, in
     const issuance = await crowdsale.issuance()
     const amountToBuy = issuance.div(rate)
 
-    await crowdsale.send(amountToBuy, {from: investor})
-    const balance = await token.balanceOf(investor)
+    await crowdsale.send(amountToBuy, {from: buyer})
+    const balance = await token.balanceOf(buyer)
     balance.should.be.bignumber.equal(issuance)
   })
 
