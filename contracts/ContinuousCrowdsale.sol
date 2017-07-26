@@ -52,12 +52,17 @@ contract ContinuousCrowdsale is Crowdsale {
         bucketAmount = updatedBucketAmount;
     }
 
+    function getRate() public constant returns(uint256) {
+        return rate;
+    }
+
     function processPurchase(address beneficiary) internal returns(uint256) {
         uint256 weiAmount = msg.value;
         uint256 updatedWeiRaised = weiRaised.add(weiAmount);
 
         // calculate token amount to be created
-        uint256 tokens = weiAmount.mul(rate);
+        uint256 purchaseRate = getRate();
+        uint256 tokens = weiAmount.mul(purchaseRate);
 
         // update state
         weiRaised = updatedWeiRaised;

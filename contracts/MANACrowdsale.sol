@@ -58,7 +58,7 @@ contract MANACrowdsale is ContinuousCrowdsale, WhitelistedCrowdsale, CappedCrowd
         buyerRate[buyer] = rate;
     }
 
-    function getRate() internal returns(uint256) {
+    function getRate() public constant returns(uint256) {
         // return the current price if we are in continuous sale
         if (continuousSale) {
             return rate;
@@ -76,26 +76,6 @@ contract MANACrowdsale is ContinuousCrowdsale, WhitelistedCrowdsale, CappedCrowd
 
         // otherwise compute the price for the auction
         return rate.sub(rateStepDecrease.mul(block.number - startBlock));
-    }
-
-    // low level token purchase function
-    function processPurchase(address beneficiary) internal returns(uint256) {
-        uint256 weiAmount = msg.value;
-        uint256 updatedWeiRaised = weiRaised.add(weiAmount);
-
-        uint256 rate = getRate();
-        // calculate token amount to be created
-        uint256 tokens = weiAmount.mul(rate);
-
-        // update state
-        weiRaised = updatedWeiRaised;
-
-        token.mint(beneficiary, tokens);
-        TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
-
-        forwardFunds();
-
-        return tokens;
     }
 
     function setWallet(address _wallet) onlyOwner public {
@@ -123,7 +103,7 @@ contract MANACrowdsale is ContinuousCrowdsale, WhitelistedCrowdsale, CappedCrowd
         // emit tokens for the foundation
         token.mint(wallet, FOUNDATION_SHARE.mul(finalSupply).div(TOTAL_SHARE));
 
-        // initialize issuance 
+        // initialize issuance
         // TODO: possibility of overflow in these operations should be analized
         uint256 annualIssuance = finalSupply.mul(INFLATION).div(100);
         issuance = annualIssuance.mul(BUCKET_SIZE).div(1 years);
