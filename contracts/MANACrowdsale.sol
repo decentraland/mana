@@ -7,7 +7,7 @@ import "./ContinuousCrowdsale.sol";
 import "./WhitelistedCrowdsale.sol";
 import "./MANAToken.sol";
 
-contract MANACrowdsale is ContinuousCrowdsale, CappedCrowdsale, WhitelistedCrowdsale, FinalizableCrowdsale {
+contract MANACrowdsale is ContinuousCrowdsale, WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrowdsale {
 
     uint256 public constant INFLATION = 8; // percent
 
@@ -131,4 +131,5 @@ contract MANACrowdsale is ContinuousCrowdsale, CappedCrowdsale, WhitelistedCrowd
         // NOTE: cannot call super here because it would finish minting and
         // the continuous sale would not be able to proceed
     }
+
 }
