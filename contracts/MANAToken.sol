@@ -9,5 +9,5 @@ contract MANAToken is BurnableToken, MintableToken {
 
     string public constant name = "MANA Token";
 
-    uint8 public constant decimals = 8;
+    uint8 public constant decimals = 18;
 }
