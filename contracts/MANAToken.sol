@@ -7,7 +7,7 @@ contract MANAToken is BurnableToken, MintableToken {
 
     string public constant symbol = "MANA";
 
-    string public constant name = "MANA Token";
+    string public constant name = "Decentraland MANA";
 
     uint8 public constant decimals = 18;
 }
