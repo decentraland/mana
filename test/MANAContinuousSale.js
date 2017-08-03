@@ -2,16 +2,16 @@
 'use strict'
 
 const expect = require('chai').expect
-const { ether, EVMThrow } = require('./utils')
+const { advanceTime, ether, EVMThrow } = require('./utils')
 const MANAContinuousSale = artifacts.require('./MANAContinuousSale.sol')
 const MANAToken = artifacts.require('./MANAToken.sol')
 
 const BigNumber = web3.BigNumber
 
-contract('ContinuousSale', function ([owner, wallet, buyer, wallet2]) {
+contract('MANAContinuousSale', function ([owner, wallet, buyer, wallet2]) {
   const rate = new BigNumber(1)
   const newRate = new BigNumber(2)
-  const value = ether(1)
+  const value = new BigNumber(100)
 
   let token, sale
 
@@ -19,6 +19,7 @@ contract('ContinuousSale', function ([owner, wallet, buyer, wallet2]) {
     token = await MANAToken.new()
     await token.mint(owner, new BigNumber(1000000))
     sale = await MANAContinuousSale.new(rate, wallet, token.address)
+    await token.transferOwnership(sale.address)
   })
 
   it('should start with continuous sale disabled', async function () {
@@ -62,7 +63,7 @@ contract('ContinuousSale', function ([owner, wallet, buyer, wallet2]) {
 
   it('should reject payments if amount of tokens is bigger than block bucket', async function () {
     await sale.start()
-    await sale.send(value, { from: buyer }).should.be.rejectedWith(EVMThrow)
+    await sale.send(new BigNumber(1000), { from: buyer }).should.be.rejectedWith(EVMThrow)
   })
 
   it('should start with a fixed issuance rate', async function () {
@@ -80,14 +81,14 @@ contract('ContinuousSale', function ([owner, wallet, buyer, wallet2]) {
   })
 
   it('should handle time buckets for token issuance', async function () {
+    await sale.start()
+
+    await sale.buyTokens(buyer, { value, from: buyer }).should.be.fulfilled
+    await sale.buyTokens(buyer, { value, from: buyer }).should.be.rejectedWith(EVMThrow)
+
     const bucketSize = await sale.BUCKET_SIZE()
-
-    const issuance = sale.issuance()
-
-    await sale.send(value).should.be.fulfilled
-    await sale.send(value).should.be.rejectedWith(EVMThrow)
-
     await advanceTime(bucketSize)
-    await sale.send(value).should.be.fulfilled
+
+    await sale.buyTokens(buyer, { value, from: buyer }).should.be.fulfilled
   })
 })

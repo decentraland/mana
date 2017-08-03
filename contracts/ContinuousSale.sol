@@ -55,6 +55,7 @@ contract ContinuousSale {
 
     function buyTokens(address beneficiary) public payable {
         require(beneficiary != 0x0);
+        require(msg.value != 0);
 
         prepareContinuousPurchase();
         uint256 tokens = processPurchase(beneficiary);
