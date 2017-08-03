@@ -25,6 +25,8 @@ contract MANACrowdsale is WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrow
     // continuous crowdsale contract
     MANAContinuousSale public continuousSale;
 
+    event WalletChange(address wallet);
+
     function MANACrowdsale(
         uint256 _startBlock,
         uint256 _endBlock,
@@ -102,6 +104,7 @@ contract MANACrowdsale is WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrow
     function setWallet(address _wallet) onlyOwner public {
         require(_wallet != 0x0);
         wallet = _wallet;
+        WalletChange(_wallet);
     }
 
     function beginContinuousSale() onlyOwner public {
