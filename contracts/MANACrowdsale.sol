@@ -27,6 +27,8 @@ contract MANACrowdsale is WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrow
 
     event WalletChange(address wallet);
 
+    event PreferentialRateChange(address buyer, uint256 rate);
+
     function MANACrowdsale(
         uint256 _startBlock,
         uint256 _endBlock,
@@ -64,6 +66,8 @@ contract MANACrowdsale is WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrow
         require(block.number < startBlock);
 
         buyerRate[buyer] = rate;
+
+        PreferentialRateChange(buyer, rate);
     }
 
     function getRate() internal returns(uint256) {

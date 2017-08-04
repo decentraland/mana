@@ -1,6 +1,8 @@
 // @flow
 'use strict'
 
+const expect = require('chai').expect
+
 const { advanceToBlock, ether, should, EVMThrow } = require('./utils')
 const MANACrowdsale = artifacts.require('./MANACrowdsale.sol')
 const MANAContinuousSale = artifacts.require('./MANAContinuousSale.sol')
@@ -111,7 +113,10 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, buyer, purchaser, buyer
     await crowdsale.addToWhitelist(buyer)
 
     const preferentialRateForBuyer = new BigNumber(200)
-    await crowdsale.setBuyerRate(buyer, preferentialRateForBuyer)
+    const { logs } = await crowdsale.setBuyerRate(buyer, preferentialRateForBuyer)
+
+    const event = logs.find(e => e.event === 'PreferentialRateChange')
+    expect(event).to.exist
 
     await crowdsale.buyTokens(buyer, {value, from: buyer})
     const balance = await token.balanceOf(buyer)
