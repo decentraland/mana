@@ -1,8 +1,23 @@
-#! /bin/bash
+#!/usr/bin/env bash
 
-output=$(nc -z localhost 8545; echo $?)
-[ $output -eq "0" ] && trpc_running=true
-if [ ! $trpc_running ]; then
+# Executes cleanup function at script exit.
+trap cleanup EXIT
+
+cleanup() {
+  # Kill the testrpc instance that we started (if we started one and if it's still running).
+  if [ -n "$testrpc_pid" ] && ps -p $testrpc_pid > /dev/null; then
+    kill -9 $testrpc_pid
+  fi
+}
+
+testrpc_running() {
+  nc -z localhost 8545
+}
+
+if testrpc_running; then
+  echo "Using existing testrpc instance"
+else
+  echo "Starting our own testrpc instance"
   # We define 10 accounts with balance 1M ether, needed for high-value tests.
   testrpc \
     --account="0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501200,1000000000000000000000000"  \
@@ -18,7 +33,5 @@ if [ ! $trpc_running ]; then
   > /dev/null &
   testrpc_pid=$!
 fi
-./node_modules/.bin/truffle test "$@"
-if [ ! $trpc_running ]; then
-  kill -9 $testrpc_pid
-fi
+
+node_modules/.bin/truffle test "$@"
