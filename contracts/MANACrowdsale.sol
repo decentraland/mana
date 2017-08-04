@@ -40,7 +40,7 @@ contract MANACrowdsale is WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrow
         uint256 _preferentialRate,
         address _wallet
     )
-        CappedCrowdsale(150000 ether)
+        CappedCrowdsale(90909 ether)
         WhitelistedCrowdsale()
         FinalizableCrowdsale()
         Crowdsale(_startBlock, _endBlock, _initialRate, _wallet)
