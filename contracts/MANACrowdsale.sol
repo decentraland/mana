@@ -19,8 +19,11 @@ contract MANACrowdsale is WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrow
     // customize the rate for each whitelisted buyer
     mapping (address => uint256) public buyerRate;
 
-    // change of price in every block during the initial coin offering
-    uint256 public rateStepDecrease;
+    // initial rate at which tokens are offered
+    uint256 public initialRate;
+
+    // end rate at which tokens are offered
+    uint256 public endRate;
 
     // continuous crowdsale contract
     MANAContinuousSale public continuousSale;
@@ -32,21 +35,22 @@ contract MANACrowdsale is WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrow
     function MANACrowdsale(
         uint256 _startBlock,
         uint256 _endBlock,
-        uint256 _rate,
-        uint256 _rateStepDecrease,
+        uint256 _initialRate,
+        uint256 _endRate,
         uint256 _preferentialRate,
         address _wallet
     )
         CappedCrowdsale(150000 ether)
         WhitelistedCrowdsale()
         FinalizableCrowdsale()
-        Crowdsale(_startBlock, _endBlock, _rate, _wallet)
+        Crowdsale(_startBlock, _endBlock, _initialRate, _wallet)
     {
-        require(_rateStepDecrease > 0);
+        require(_initialRate > 0);
+        require(_endRate > 0);
         require(_preferentialRate > 0);
-        require(_rate > _rateStepDecrease * (1 + _endBlock - _startBlock));
 
-        rateStepDecrease = _rateStepDecrease;
+        initialRate = _initialRate;
+        endRate = _endRate;
         preferentialRate = _preferentialRate;
 
         continuousSale = createContinuousSaleContract();
@@ -82,7 +86,11 @@ contract MANACrowdsale is WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrow
         }
 
         // otherwise compute the price for the auction
-        return rate.sub(rateStepDecrease.mul(block.number - startBlock));
+        uint256 elapsed = block.number - startBlock;
+        uint256 rateRange = initialRate - endRate;
+        uint256 blockRange = endBlock - startBlock;
+
+        return initialRate.sub(rateRange.div(blockRange).mul(elapsed));
     }
 
     // low level token purchase function

@@ -11,9 +11,12 @@ const MANAToken = artifacts.require('./MANAToken.sol')
 const BigNumber = web3.BigNumber
 
 contract('MANACrowdsale', function ([_, wallet, wallet2, buyer, purchaser, buyer2, purchaser2]) {
-  const rate = new BigNumber(1000)
+
+  const initialRate = new BigNumber(1000)
+  const endRate = new BigNumber(900)
+  const rateAtBlock5 = new BigNumber(1000 - 5 * 10)
+
   const newRate = new BigNumber(500)
-  const rateStepDecrease = new BigNumber(10)
   const preferentialRate = new BigNumber(2000)
   const value = ether(1)
 
@@ -30,8 +33,8 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, buyer, purchaser, buyer
     crowdsale = await MANACrowdsale.new(
       startBlock,
       endBlock,
-      rate,
-      rateStepDecrease,
+      initialRate,
+      endRate,
       preferentialRate,
       wallet
     )
@@ -80,13 +83,13 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, buyer, purchaser, buyer
 
     await crowdsale.buyTokens(buyer, {value, from: purchaser})
     balance = await token.balanceOf(buyer)
-    balance.should.be.bignumber.equal(value.mul(rate))
+    balance.should.be.bignumber.equal(value.mul(initialRate))
 
     await advanceToBlock(startBlock + 4)
 
     await crowdsale.buyTokens(buyer2, {value, from: purchaser2})
     balance = await token.balanceOf(buyer2)
-    const rateAtBlock5 = rate.minus(rateStepDecrease.mul(5))
+
     balance.should.be.bignumber.equal(value.mul(rateAtBlock5))
   })
 
