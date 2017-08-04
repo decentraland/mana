@@ -38,7 +38,11 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, buyer, purchaser, buyer
 
   it('owner should be able to change wallet', async function () {
     await crowdsale.setWallet(wallet2)
-    const wallet = await crowdsale.wallet()
+    let wallet = await crowdsale.wallet()
+    wallet.should.equal(wallet2)
+
+    const continuousSale = MANAContinuousSale.at(await crowdsale.continuousSale())
+    wallet = await continuousSale.wallet()
     wallet.should.equal(wallet2)
   })
 

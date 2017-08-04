@@ -104,6 +104,7 @@ contract MANACrowdsale is WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrow
     function setWallet(address _wallet) onlyOwner public {
         require(_wallet != 0x0);
         wallet = _wallet;
+        continuousSale.setWallet(_wallet);
         WalletChange(_wallet);
     }
 
