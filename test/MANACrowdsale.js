@@ -119,14 +119,20 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, buyer, purchaser, buyer
     balance.should.not.be.bignumber.equal(value.mul(preferentialRate))
   })
 
+  it('owner cannot set a custom rate before whitelisting a buyer', async function() {
+    await crowdsale.setBuyerRate(buyer, new BigNumber(200)).should.be.rejectedWith(EVMThrow)
+  })
+
   it('beneficiary is not the same as buyer', async function() {
-    const preferentialRateForBuyer = new BigNumber(200)
-    const invalidRate = new BigNumber(100)
     const beneficiary = buyer2
-    await crowdsale.setBuyerRate(buyer, preferentialRateForBuyer)
-    await crowdsale.setBuyerRate(beneficiary, invalidRate)
 
     await crowdsale.addToWhitelist(buyer)
+    await crowdsale.addToWhitelist(beneficiary)
+
+    const preferentialRateForBuyer = new BigNumber(200)
+    const invalidRate = new BigNumber(100)
+    await crowdsale.setBuyerRate(buyer, preferentialRateForBuyer)
+    await crowdsale.setBuyerRate(beneficiary, invalidRate)
 
     await crowdsale.buyTokens(beneficiary, {value, from: buyer})
     const balance = await token.balanceOf(beneficiary)

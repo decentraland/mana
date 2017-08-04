@@ -59,8 +59,8 @@ contract MANACrowdsale is WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrow
     }
 
     function setBuyerRate(address buyer, uint256 rate) onlyOwner public {
-        require(buyer != 0);
         require(rate != 0);
+        require(isWhitelisted(buyer));
 
         buyerRate[buyer] = rate;
     }
