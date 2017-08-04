@@ -14,7 +14,6 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, buyer, purchaser, buyer
 
   const initialRate = new BigNumber(1000)
   const endRate = new BigNumber(900)
-  const rateAtBlock5 = new BigNumber(1000 - 5 * 10)
 
   const newRate = new BigNumber(500)
   const preferentialRate = new BigNumber(2000)
@@ -76,21 +75,97 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, buyer, purchaser, buyer
     await crowdsale.beginContinuousSale({from: purchaser}).should.be.rejectedWith(EVMThrow)
   })
 
-  it('rate during auction should decrease at a fixed step every block', async function () {
-    let balance
+  describe('rate during auction should decrease at a fixed step every block', async function () {
 
-    await advanceToBlock(startBlock - 1)
+    let balance, startBlock, endBlock
 
-    await crowdsale.buyTokens(buyer, {value, from: purchaser})
-    balance = await token.balanceOf(buyer)
-    balance.should.be.bignumber.equal(value.mul(initialRate))
+    let initialRate = 9166
+    let endRate = 5500
+    let preferentialRate = initialRate
+    const rateAtBlock10 = new BigNumber(9165)
+    const rateAtBlock20 = new BigNumber(9164)
+    const rateAtBlock100 = new BigNumber(9155)
+    const rateAtBlock2 = new BigNumber(9166)
+    const rateAtBlock10000 = new BigNumber(7973)
+    const rateAtBlock30000 = new BigNumber(5586)
 
-    await advanceToBlock(startBlock + 4)
+    beforeEach(async function() {
 
-    await crowdsale.buyTokens(buyer2, {value, from: purchaser2})
-    balance = await token.balanceOf(buyer2)
+      startBlock = web3.eth.blockNumber + 10
+      endBlock = web3.eth.blockNumber + 10 + 30720
 
-    balance.should.be.bignumber.equal(value.mul(rateAtBlock5))
+      crowdsale = await MANACrowdsale.new(
+        startBlock,
+        endBlock,
+        initialRate,
+        endRate,
+        preferentialRate,
+        wallet
+      )
+      token = MANAToken.at(await crowdsale.token())
+
+    })
+    it('at start', async function () {
+      await advanceToBlock(startBlock - 1)
+
+      await crowdsale.buyTokens(buyer, {value, from: purchaser})
+      balance = await token.balanceOf(buyer)
+      balance.should.be.bignumber.equal(value.mul(initialRate))
+    })
+
+    it('at block 10', async function () {
+      await advanceToBlock(startBlock + 9)
+
+      await crowdsale.buyTokens(buyer2, {value, from: purchaser2})
+      balance = await token.balanceOf(buyer2)
+
+      balance.should.be.bignumber.equal(value.mul(rateAtBlock10))
+    })
+
+    it('at block 20', async function () {
+      await advanceToBlock(startBlock + 19)
+
+      await crowdsale.buyTokens(buyer2, {value, from: purchaser2})
+      balance = await token.balanceOf(buyer2)
+
+      balance.should.be.bignumber.equal(value.mul(rateAtBlock20))
+    })
+
+    it('at block 100', async function () {
+      await advanceToBlock(startBlock + 99)
+
+      await crowdsale.buyTokens(buyer2, {value, from: purchaser2})
+      balance = await token.balanceOf(buyer2)
+
+      balance.should.be.bignumber.equal(value.mul(rateAtBlock100))
+    })
+
+    it('at block 2', async function () {
+      await advanceToBlock(startBlock + 1)
+
+      await crowdsale.buyTokens(buyer2, {value, from: purchaser2})
+      balance = await token.balanceOf(buyer2)
+
+      balance.should.be.bignumber.equal(value.mul(rateAtBlock2))
+    })
+
+    it.skip('at block 10000', async function () {
+      await advanceToBlock(startBlock + 9999)
+
+      await crowdsale.buyTokens(buyer2, {value, from: purchaser2})
+      balance = await token.balanceOf(buyer2)
+
+      balance.should.be.bignumber.equal(value.mul(rateAtBlock10000))
+    })
+
+    it.skip('at block 30000', async function () {
+      await advanceToBlock(startBlock + 29999)
+
+      await crowdsale.buyTokens(buyer2, {value, from: purchaser2})
+      balance = await token.balanceOf(buyer2)
+
+      balance.should.be.bignumber.equal(value.mul(rateAtBlock30000))
+    })
   })
 
   it('whitelisted buyers should access tokens at reduced price until end of auction', async function () {

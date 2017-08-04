@@ -30,7 +30,7 @@ contract MANACrowdsale is WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrow
 
     event WalletChange(address wallet);
 
-    event PreferentialRateChange(address buyer, uint256 rate);
+    event PreferentialRateChange(address indexed buyer, uint256 rate);
 
     function MANACrowdsale(
         uint256 _startBlock,
@@ -90,7 +90,7 @@ contract MANACrowdsale is WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrow
         uint256 rateRange = initialRate - endRate;
         uint256 blockRange = endBlock - startBlock;
 
-        return initialRate.sub(rateRange.div(blockRange).mul(elapsed));
+        return initialRate.sub(rateRange.mul(elapsed).div(blockRange));
     }
 
     // low level token purchase function
