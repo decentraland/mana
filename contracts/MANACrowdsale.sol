@@ -3,13 +3,11 @@ pragma solidity ^0.4.11;
 import "zeppelin-solidity/contracts/crowdsale/CappedCrowdsale.sol";
 import "zeppelin-solidity/contracts/crowdsale/Crowdsale.sol";
 import "zeppelin-solidity/contracts/crowdsale/FinalizableCrowdsale.sol";
-import "./ContinuousCrowdsale.sol";
 import "./WhitelistedCrowdsale.sol";
+import "./MANAContinuousSale.sol";
 import "./MANAToken.sol";
 
-contract MANACrowdsale is ContinuousCrowdsale, WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrowdsale {
-
-    uint256 public constant INFLATION = 8; // percent
+contract MANACrowdsale is WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrowdsale {
 
     uint256 public constant TOTAL_SHARE = 100;
     uint256 public constant CROWDSALE_SHARE = 40;
@@ -21,49 +19,62 @@ contract MANACrowdsale is ContinuousCrowdsale, WhitelistedCrowdsale, CappedCrowd
     // customize the rate for each whitelisted buyer
     mapping (address => uint256) public buyerRate;
 
-    // change of price in every block during the initial coin offering
-    uint256 public rateStepDecrease;
+    // initial rate at which tokens are offered
+    uint256 public initialRate;
 
-    event RateChange(uint256 amount);
+    // end rate at which tokens are offered
+    uint256 public endRate;
+
+    // continuous crowdsale contract
+    MANAContinuousSale public continuousSale;
+
+    event WalletChange(address wallet);
+
+    event PreferentialRateChange(address indexed buyer, uint256 rate);
 
     function MANACrowdsale(
         uint256 _startBlock,
         uint256 _endBlock,
-        uint256 _rate,
-        uint256 _rateStepDecrease,
+        uint256 _initialRate,
+        uint256 _endRate,
         uint256 _preferentialRate,
         address _wallet
     )
-        CappedCrowdsale(150000 ether)
+        CappedCrowdsale(90909 ether)
         WhitelistedCrowdsale()
         FinalizableCrowdsale()
-        Crowdsale(_startBlock, _endBlock, _rate, _wallet)
+        Crowdsale(_startBlock, _endBlock, _initialRate, _wallet)
     {
-        require(_rateStepDecrease > 0);
+        require(_initialRate > 0);
+        require(_endRate > 0);
         require(_preferentialRate > 0);
-        require(_rate > _rateStepDecrease * (_endBlock - _startBlock));
 
-        rateStepDecrease = _rateStepDecrease;
+        initialRate = _initialRate;
+        endRate = _endRate;
         preferentialRate = _preferentialRate;
+
+        continuousSale = createContinuousSaleContract();
     }
 
-    function createTokenContract() internal returns (MintableToken) {
+    function createTokenContract() internal returns(MintableToken) {
         return new MANAToken();
     }
 
+    function createContinuousSaleContract() internal returns(MANAContinuousSale) {
+        return new MANAContinuousSale(rate, wallet, token);
+    }
+
     function setBuyerRate(address buyer, uint256 rate) onlyOwner public {
-        require(buyer != 0);
         require(rate != 0);
+        require(isWhitelisted(buyer));
+        require(block.number < startBlock);
 
         buyerRate[buyer] = rate;
+
+        PreferentialRateChange(buyer, rate);
     }
 
     function getRate() internal returns(uint256) {
-        // return the current price if we are in continuous sale
-        if (continuousSale) {
-            return rate;
-        }
-
         // some early buyers are offered a discount on the crowdsale price
         if (buyerRate[msg.sender] != 0) {
             return buyerRate[msg.sender];
@@ -75,11 +86,18 @@ contract MANACrowdsale is ContinuousCrowdsale, WhitelistedCrowdsale, CappedCrowd
         }
 
         // otherwise compute the price for the auction
-        return rate.sub(rateStepDecrease.mul(block.number - startBlock));
+        uint256 elapsed = block.number - startBlock;
+        uint256 rateRange = initialRate - endRate;
+        uint256 blockRange = endBlock - startBlock;
+
+        return initialRate.sub(rateRange.mul(elapsed).div(blockRange));
     }
 
     // low level token purchase function
-    function processPurchase(address beneficiary) internal returns(uint256) {
+    function buyTokens(address beneficiary) payable {
+        require(beneficiary != 0x0);
+        require(validPurchase());
+
         uint256 weiAmount = msg.value;
         uint256 updatedWeiRaised = weiRaised.add(weiAmount);
 
@@ -94,26 +112,22 @@ contract MANACrowdsale is ContinuousCrowdsale, WhitelistedCrowdsale, CappedCrowd
         TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
 
         forwardFunds();
-
-        return tokens;
     }
 
     function setWallet(address _wallet) onlyOwner public {
         require(_wallet != 0x0);
         wallet = _wallet;
+        continuousSale.setWallet(_wallet);
+        WalletChange(_wallet);
     }
 
-    function setRate(uint256 _rate) onlyOwner public {
-        require(_rate > 0);
+    function beginContinuousSale() onlyOwner public {
         require(isFinalized);
 
-        rate = _rate;
-        RateChange(_rate);
-    }
+        token.transferOwnership(continuousSale);
 
-    function startContinuousSale() onlyOwner public {
-        require(isFinalized);
-        continuousSale = true;
+        continuousSale.start();
+        continuousSale.transferOwnership(owner);
     }
 
     function finalization() internal {
@@ -122,10 +136,6 @@ contract MANACrowdsale is ContinuousCrowdsale, WhitelistedCrowdsale, CappedCrowd
 
         // emit tokens for the foundation
         token.mint(wallet, FOUNDATION_SHARE.mul(finalSupply).div(TOTAL_SHARE));
-
-        // initialize issuance 
-        uint256 annualIssuance = finalSupply.mul(INFLATION).div(100);
-        issuance = annualIssuance.mul(BUCKET_SIZE).div(1 years);
 
         // NOTE: cannot call super here because it would finish minting and
         // the continuous sale would not be able to proceed
