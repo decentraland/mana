@@ -32,6 +32,10 @@ contract MANACrowdsale is WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrow
 
     event PreferentialRateChange(address indexed buyer, uint256 rate);
 
+    event InitialRateChange(uint256 rate);
+
+    event EndRateChange(uint256 rate);
+
     function MANACrowdsale(
         uint256 _startBlock,
         uint256 _endBlock,
@@ -72,6 +76,24 @@ contract MANACrowdsale is WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrow
         buyerRate[buyer] = rate;
 
         PreferentialRateChange(buyer, rate);
+    }
+
+    function setInitialRate(uint256 rate) onlyOwner public {
+        require(rate != 0);
+        require(block.number < startBlock);
+
+        initialRate = rate;
+
+        InitialRateChange(rate);
+    }
+
+    function setEndRate(uint256 rate) onlyOwner public {
+        require(rate != 0);
+        require(block.number < startBlock);
+
+        endRate = rate;
+
+        EndRateChange(rate);
     }
 
     function getRate() internal returns(uint256) {
