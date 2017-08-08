@@ -40,6 +40,11 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, buyer, purchaser, buyer
     token = MANAToken.at(await crowdsale.token())
   })
 
+  it('starts with token paused', async function () {
+    const paused = await token.paused()
+    paused.should.equal(true)
+  })
+
   it('owner should be able to change wallet', async function () {
     await crowdsale.setWallet(wallet2)
     let wallet = await crowdsale.wallet()

@@ -58,6 +58,8 @@ contract MANACrowdsale is WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrow
         preferentialRate = _preferentialRate;
 
         continuousSale = createContinuousSaleContract();
+
+        MANAToken(token).pause();
     }
 
     function createTokenContract() internal returns(MintableToken) {
