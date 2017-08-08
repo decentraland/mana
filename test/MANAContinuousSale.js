@@ -17,7 +17,9 @@ contract('MANAContinuousSale', function ([owner, wallet, buyer, wallet2]) {
 
   beforeEach(async function () {
     token = await MANAToken.new()
+    await token.pause()
     await token.mint(owner, new BigNumber(1000000))
+
     sale = await MANAContinuousSale.new(rate, wallet, token.address)
     await token.transferOwnership(sale.address)
   })
@@ -29,6 +31,16 @@ contract('MANAContinuousSale', function ([owner, wallet, buyer, wallet2]) {
     await sale.start()
     started = await sale.started()
     started.should.equal(true)
+  })
+
+  it('owner should be able to unpause token', async function() {
+    await sale.unpauseToken().should.be.fulfilled
+    const paused = await token.paused()
+    paused.should.equal(false)
+  })
+
+  it('non-owners should no be able to unpause token', async function () {
+    await sale.unpauseToken({ from: buyer }).should.be.rejectedWith(EVMThrow)
   })
 
   it('should accept payments only if sale has started', async function () {
