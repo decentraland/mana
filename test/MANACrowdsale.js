@@ -76,6 +76,22 @@ contract('MANACrowdsale', function ([_, wallet, wallet2, buyer, purchaser, buyer
     started.should.equal(true)
   })
 
+  it('owner should be able to unpause token after crowdsale ends', async function () {
+    await advanceToBlock(endBlock)
+
+    await crowdsale.unpauseToken().should.be.rejectedWith(EVMThrow)
+
+    await crowdsale.finalize()
+
+    let paused = await token.paused()
+    paused.should.equal(true)
+
+    await crowdsale.unpauseToken()
+
+    paused = await token.paused()
+    paused.should.equal(false)
+  })
+
   it('non-owners should not be able to start continuous sale', async function () {
     await crowdsale.beginContinuousSale({from: purchaser}).should.be.rejectedWith(EVMThrow)
   })
