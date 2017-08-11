@@ -145,6 +145,17 @@ contract MANACrowdsale is WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrow
         WalletChange(_wallet);
     }
 
+    function unpauseToken() onlyOwner {
+        require(isFinalized);
+        MANAToken(token).unpause();
+    }
+
+    function pauseToken() onlyOwner {
+        require(isFinalized);
+        MANAToken(token).pause();
+    }
+
+
     function beginContinuousSale() onlyOwner public {
         require(isFinalized);
 

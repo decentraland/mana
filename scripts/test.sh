@@ -19,7 +19,7 @@ if testrpc_running; then
 else
   echo "Starting our own testrpc instance"
   # We define 10 accounts with balance 1M ether, needed for high-value tests.
-  testrpc \
+  testrpc -l 10000000 \
     --account="0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501200,1000000000000000000000000"  \
     --account="0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501201,1000000000000000000000000"  \
     --account="0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501202,1000000000000000000000000"  \
