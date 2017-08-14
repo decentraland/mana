@@ -13,6 +13,8 @@ contract MANACrowdsale is WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrow
     uint256 public constant CROWDSALE_SHARE = 40;
     uint256 public constant FOUNDATION_SHARE = 60;
 
+    uint256 public constant MAX_GAS = 200000;
+
     // price at which whitelisted buyers will be able to buy tokens
     uint256 public preferentialRate;
 
@@ -44,7 +46,7 @@ contract MANACrowdsale is WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrow
         uint256 _preferentialRate,
         address _wallet
     )
-        CappedCrowdsale(66666 ether)
+        CappedCrowdsale(82888 ether)
         WhitelistedCrowdsale()
         FinalizableCrowdsale()
         Crowdsale(_startBlock, _endBlock, _initialRate, _wallet)
@@ -121,6 +123,7 @@ contract MANACrowdsale is WhitelistedCrowdsale, CappedCrowdsale, FinalizableCrow
     function buyTokens(address beneficiary) payable {
         require(beneficiary != 0x0);
         require(validPurchase());
+        require(tx.gasprice < MAX_GAS);
 
         uint256 weiAmount = msg.value;
         uint256 updatedWeiRaised = weiRaised.add(weiAmount);
