@@ -26,7 +26,8 @@
     "eslint-plugin-promise": "^3.7.0",
     "eslint-plugin-standard": "^3.1.0",
     "ganache-cli": "^6.1.0",
-    "truffle": "^3.4.11"
+    "truffle": "^3.4.11",
+    "truffle-flattener": "^1.2.10"
   },
   "scripts": {
     "test": "./scripts/test.sh",
